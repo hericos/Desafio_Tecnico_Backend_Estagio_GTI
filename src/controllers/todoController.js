@@ -1,97 +1,79 @@
 // controllers/todoController.js
-import { tasks } from '../models/todoModel.js';
+import { ToDo } from '../models/todoModel.js';
 
 export default class ToDoController {
 
-    static listarTasks(req, res) {
-        res.status(200).json(tasks);
-    }
-
-static criar(req, res) {
+  static async listarTasks(req, res) {
     try {
-        const { title, description, status } = req.body;
+      const tasks = await ToDo.findAll({ order: [['createdAt', 'DESC']] });
+      return res.status(200).json(tasks);
+    } catch (error) {
+      return res.status(500).json({ erro: 'Erro ao listar tasks', error: error.message });
+    }
+  }
 
-        
-        if (!title || title.trim() === "") {
-            return res.status(400).json({ erro: "O campo 'title' é obrigatório." });
-        }
+  static async criar(req, res) {
+    try {
+      const { title, description, status } = req.body;
 
+      if (!title || title.trim() === '') {
+        return res.status(400).json({ erro: "O campo 'title' é obrigatório." });
+      }
 
+      const novaTask = await ToDo.create({
+        title: title.trim(),
+        description: description || '',
+        status: status || 'pendente'
+      });
 
-        const id = tasks.length + 1;
-        const novaTask = {
-            id,
-            title: title.trim(),
-            description: description || "",
-            status: status || "pendente",
-            createdAt: new Date().toLocaleString('pt-BR')
-
-
-        };
-
-        tasks.push(novaTask);
-
-        res.status(201).json({ msg: "Task criada com sucesso!", task: novaTask });
+      return res.status(201).json({ msg: 'Task criada com sucesso!', task: novaTask });
 
     } catch (error) {
-        res.status(500).json({ erro: "Erro ao criar tarefa.", error: error.message });
+      return res.status(500).json({ erro: 'Erro ao criar tarefa.', error: error.message });
     }
-}
+  }
 
-
-
-    static listarPorId(req, res){
-        try {
-            const id = parseInt(req.params.id);
-            const task = tasks.find(t => t.id === id);
-            if (!task) {
-                res.status(400).json({ msg: "task não encontrada!"})
-                return                
-            }
-            res.status(200).json(task)
-
-        } catch (error) {
-            res.status(500).json({msg: "erro ao buscar aluno!"});
-            return
-        }
-    }
-
-    static atualizar(req, res) {
-        try {
-        const id = parseInt(req.params.id);
-        const { title, description, status } = req.body;
-
-        const task = tasks.find(t => t.id === id);
-        if (!task) {
-            return res.status(404).json({ msg: "Task não encontrada!" });
-        }
-
-        // Atualiza apenas os campos enviados
-        if (title) task.title = title.trim();
-        if (description !== undefined) task.description = description;
-        if (status) task.status = status;
-
-        return res.status(200).json({ msg: "Task atualizada com sucesso!", task });
-
+  static async listarPorId(req, res) {
+    try {
+      const { id } = req.params;
+      const task = await ToDo.findByPk(id);
+      if (!task) return res.status(404).json({ msg: 'task não encontrada!' });
+      return res.status(200).json(task);
     } catch (error) {
-        return res.status(500).json({ msg: "Erro ao atualizar task!", error: error.message });
+      return res.status(500).json({ msg: 'erro ao buscar task!', error: error.message });
     }
-}
+  }
 
+  static async atualizar(req, res) {
+    try {
+      const { id } = req.params;
+      const { title, description, status } = req.body;
 
-    static deletar(req, res) {
-        try {
-            const id = parseInt(req.params.id);
-            const task = tasks.findIndex(t => t.id === id);
-            if (task === -1){
-                res.status(404).json({msg: "task não encontrada"});
-                return;
-            }
-            tasks.splice(task, 1);
-            res.status(200).json({msg: "task deletada com sucesso!"});
-        } catch (error) {
-            res.status(500).json({msg: "erro ao deletar task!"});
-        }
+      const task = await ToDo.findByPk(id);
+      if (!task) return res.status(404).json({ msg: 'Task não encontrada!' });
+
+      if (title !== undefined) task.title = title.trim();
+      if (description !== undefined) task.description = description;
+      if (status !== undefined) task.status = status;
+
+      await task.save();
+
+      return res.status(200).json({ msg: 'Task atualizada com sucesso!', task });
+    } catch (error) {
+      return res.status(500).json({ msg: 'Erro ao atualizar task!', error: error.message });
     }
+  }
+
+  static async deletar(req, res) {
+    try {
+      const { id } = req.params;
+      const task = await ToDo.findByPk(id);
+      if (!task) return res.status(404).json({ msg: 'task não encontrada' });
+      await task.destroy();
+      return res.status(200).json({ msg: 'task deletada com sucesso!' });
+    } catch (error) {
+      return res.status(500).json({ msg: 'erro ao deletar task!', error: error.message });
+    }
+  }
 
 }

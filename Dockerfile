@@ -14,7 +14,7 @@ RUN npm install --production
 COPY . .
 
 # 6. Expor porta que a API vai rodar
-EXPOSE 3000
+EXPOSE 3005
 
 # 7. Comando para iniciar a aplicação
 CMD ["node", "app.js"]
