@@ -40,7 +40,7 @@ node app.js
 
 ## 🚀 Estrutura e boas práticas
 
-* **Organização em camadas:** a aplicação está estruturada em `routes`, `controllers` e `services`, facilitando manutenção e escalabilidade.
+* **Organização em camadas:** a aplicação está estruturada em `routes`, `controllers` e `models`, facilitando manutenção e escalabilidade.
 * **Documentação da API:** descrita no próprio README.md para referência rápida; também é possível integrar Swagger para documentação mais interativa.
 * **Deploy funcional:** a API está online em URL pública, permitindo acesso remoto e testes reais.
 * **Container Docker:** a aplicação está dockerizada, garantindo portabilidade e fácil deploy em diferentes ambientes.
